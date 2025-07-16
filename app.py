@@ -5,9 +5,6 @@ from flask import Flask, redirect, request, render_template, url_for
 
 app = Flask(__name__)
 
-@app.route("/")
-def render_index_page():
-    return render_template('index.html')
 
 # Sample data
 transactions = [
@@ -87,7 +84,24 @@ def delete_transaction(transaction_id):
     # Redirect to the transactions list page after deleting the transaction
     return redirect(url_for("get_transactions"))
 
-# Run the Flask app
+# Search for transactions within a specified amount range
+@app.route("/search", methods=["GET", "POST"])
+def search_transactions():
+    if request.method == 'POST':
+        # Get the minimum and maximum amount from the form
+        min_amount = float(request.form['min_amount'])
+        max_amount = float(request.form['max_amount'])
+
+        # Filter transactions based on the specified amount range
+        filtered_transactions = list(filter(
+            lambda t: min_amount <= t['amount'] <= max_amount, transactions))
+
+        # Render the search results template with the filtered transactions
+        return render_template("transactions.html", transactions=filtered_transactions)
+    # If GET, render the search form with all transactions or empty list
+    return render_template("search.html", transactions=transactions)
+  
+
 # Run the Flask app
 if __name__ == "__main__":
     app.run(debug=True)
